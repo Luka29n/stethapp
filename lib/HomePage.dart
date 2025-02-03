@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'settings.dart';
@@ -5,7 +6,12 @@ import 'bluetoothPage.dart';
 import 'DataLog.dart';
 import 'BPM.dart';
 import 'ECGPage.dart';
-import 'o2Page.dart';
+import 'O2Page.dart';
+import 'Login_page.dart';
+import 'auth_page.dart';
+
+Color FistColor = Color.fromARGB(209, 255, 0, 0);
+Color SecondColor = Color.fromARGB(255, 0, 0, 0);
 
 class HomePage extends StatelessWidget {
   const HomePage({
@@ -35,23 +41,35 @@ class HomePage extends StatelessWidget {
                       child: Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),
-                          color: const Color.fromARGB(162, 255, 0, 0),
+                          color: FistColor,
                         ),
                         child: Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Padding(
-                                  padding: EdgeInsets.only(left: 20,right: 20),
-                                  child: Image(image: AssetImage("assets/pictures/hearth.png")),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Expanded(  // Ajout de Expanded ici
+                                child: Padding(
+                                  padding: const EdgeInsets.only(left: 20, right: 20),
+                                  child: Image(
+                                    image: AssetImage("assets/pictures/hearth.png"),
+                                    fit: BoxFit.contain,  // Ajout de BoxFit.contain
+                                  ),
                                 ),
-                                Text("BPM",
-                                    style: GoogleFonts.poppins(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 30,
-                                        color: const Color.fromARGB(255, 255, 255, 255)))
-                              ],
-                            )),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 40),  // Ajout d'un padding en bas
+                                child: Text(
+                                  "BPM",
+                                  style: GoogleFonts.poppins(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 30,
+                                    color: const Color.fromARGB(255, 255, 255, 255),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -74,7 +92,7 @@ class HomePage extends StatelessWidget {
                           child: Container(
                             decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(10),
-                            color: const Color.fromARGB(255, 0, 0, 0),
+                            color: SecondColor
                           ),
                           
                           child: Center(
@@ -115,19 +133,19 @@ class HomePage extends StatelessWidget {
                             onTap: () {
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (context) => const O2page()),
+                                MaterialPageRoute(builder: (context) => const O2Page()),
                               );
                             },
                               child: Container(
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(10),
-                                color: const Color.fromARGB(255, 0, 0, 0),
+                                color: SecondColor
                                 ),
                                 child: Center(
                                   child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                              Icon(Icons.water_drop,color: Color.fromARGB(162, 255, 0, 0),size: 80,),
+                              Icon(Icons.water_drop,color: FistColor,size: 80,),
                               Text("O₂",
                               style: GoogleFonts.poppins(
                                 fontWeight: FontWeight.bold,
@@ -145,11 +163,77 @@ class HomePage extends StatelessWidget {
                             flex: 5,
                             child: Padding(
                               padding: const EdgeInsets.fromLTRB(3, 3, 15, 3),
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.push(context,
+                                  MaterialPageRoute(builder: (context) => AuthPage()),
+                                  );
+                                },
                               child: Container(
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(10),
-                                color: const Color.fromARGB(162, 255, 0, 0),
+                                color:  FistColor,
                                 ),
+                                child: StreamBuilder<User?>(
+                                  stream: FirebaseAuth.instance.authStateChanges(),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState == ConnectionState.waiting) {
+                                      return const Center(
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              "Chargement...",
+                                              style: TextStyle(color: Colors.white, fontSize: 10),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    }
+                                    if (snapshot.hasData) {
+                                      return Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.account_circle_rounded,
+                                            color: Color.fromARGB(255, 255, 255, 255),
+                                            size: 80,
+                                          ),
+                                          Text(
+                                            "Account",
+                                            style: GoogleFonts.poppins(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 17,
+                                              color: Color.fromARGB(255, 255, 255, 255),
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    }
+                                    else {
+                                      return Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.account_circle_rounded,
+                                          color: Color.fromARGB(255, 255, 255, 255),
+                                          size: 80,
+                                        ),
+                                        Text(
+                                          "login",
+                                          style: GoogleFonts.poppins(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 23,
+                                            color: Color.fromARGB(255, 255, 255, 255),
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                    }
+
+                                  },
+                                )
+                              ),
                               ),
                             ),
                             ),
@@ -175,7 +259,7 @@ class HomePage extends StatelessWidget {
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),
-                  color: const Color.fromARGB(255, 0, 0, 0),
+                  color: SecondColor
                 ),
                 child: Center(
                   child: Text("SETTINGS",
@@ -206,7 +290,7 @@ class HomePage extends StatelessWidget {
                       child: Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),
-                          color: const Color.fromARGB(255, 0, 0, 0),
+                          color: SecondColor
                         ),
                         child: Center(
                           child: Column(
@@ -240,7 +324,7 @@ class HomePage extends StatelessWidget {
                       child: Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),
-                          color: const Color.fromARGB(162, 255, 0, 0),
+                          color: FistColor,
                         ),
                         child: Center(
                           child: Column(

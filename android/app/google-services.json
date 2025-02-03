@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "1056875680430",
+    "project_id": "stethapp",
+    "storage_bucket": "stethapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1056875680430:android:bffa1a9dc28cc2abbdd33f",
+        "android_client_info": {
+          "package_name": "com.example.stethoscope"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1056875680430-04v84g3am53jssm6324nj888u7f0803m.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.stethoscope",
+            "certificate_hash": "5f8dd9143122c4c5c9d79598f7b15619876aad4a"
+          }
+        },
+        {
+          "client_id": "1056875680430-in63d8ln6s30skfeohdfu6so12kj5fne.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCAZtGHzQhvxXjwnXlXo3Y2od-3mMPoTdY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1056875680430-hm12mg4894lda76si0m63315hed4oi6f.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1056875680430-2egninnnlupid29b24qupm1l9ov78mie.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.stethoscope"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

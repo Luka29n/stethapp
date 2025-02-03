@@ -38,10 +38,10 @@ class _BluetoothPairPageState extends State<BluetoothPairPage> {
     try {
       // Cancel any existing subscription
       await _scanSubscription?.cancel();
-      
+
       // Start the scan
       await FlutterBluePlus.startScan(timeout: const Duration(seconds: 1));
-      
+
       // Listen for scan results
       _scanSubscription = FlutterBluePlus.scanResults.listen((results) {
         setState(() {
@@ -74,27 +74,6 @@ class _BluetoothPairPageState extends State<BluetoothPairPage> {
     }
   }
 
-  Future<bool> _requestPermissions() async {
-    print("Requesting Bluetooth permissions...");
-    Map<Permission, PermissionStatus> statuses = await [
-      Permission.bluetooth,
-      Permission.bluetoothScan,
-      Permission.bluetoothAdvertise,
-      Permission.bluetoothConnect,
-      Permission.location,
-    ].request();
-
-    print("Permission statuses: $statuses");
-
-    return statuses.values.every((status) => status.isGranted);
-  }
-
-
-
-
-
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -102,57 +81,101 @@ class _BluetoothPairPageState extends State<BluetoothPairPage> {
         title: const Text("Bluetooth Pairing"),
       ),
       body: Column(
-        children: [const 
-          Padding(
-            padding:  EdgeInsets.all(16.0),
-            child:  Text(
-              "named devices",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        children: [
+          // Section for named devices
+          const Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Text(
+              "Named Devices",
+              style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
             ),
           ),
           Container(
             child: _isScanning
-                ? const Center(child: CircularProgressIndicator())
-                : ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: _scanResults.where((result) => result.device.name.isNotEmpty).length,
-                    itemBuilder: (context, index) {
-                      final namedDevices = _scanResults.where((result) => result.device.name.isNotEmpty).toList();
-                      final device = namedDevices[index].device;
-                      return ListTile(
-                        title: Text(device.name),
-                        subtitle: Text(device.id.id),
-                        trailing: ElevatedButton(
-                          child: const Text("Connect"),
-                          onPressed: () => _connectToDevice(device),
-                        ),
+                ? const Center(
+                    child: CircularProgressIndicator(),
+                  )
+                : Builder(
+                    builder: (context) {
+                      final namedDevices = _scanResults
+                          .where((result) => result.device.name.isNotEmpty)
+                          .toList();
+
+                      if (namedDevices.isEmpty) {
+                        return const Center(
+                          child: Text(
+                            "No named devices found",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        );
+                      }
+
+                      return ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: namedDevices.length,
+                        itemBuilder: (context, index) {
+                          final device = namedDevices[index].device;
+                          return ListTile(
+                            title: Text(device.name),
+                            subtitle: Text(device.id.id),
+                            trailing: ElevatedButton(
+                              child: const Text("Connect"),
+                              onPressed: () => _connectToDevice(device),
+                            ),
+                          );
+                        },
                       );
                     },
                   ),
           ),
+          SizedBox(height: 80,),
+          // Section for unnamed devices
           const Padding(
-            padding:  EdgeInsets.all(16.0),
-            child:  Text(
-              "other devices",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            padding: EdgeInsets.fromLTRB(16, 16, 16, 16),
+            child: Text(
+              "Other Devices",
+              style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
             ),
           ),
           Expanded(
             child: _isScanning
-                ? const Center(child: CircularProgressIndicator())
-                : ListView.builder(
-                    itemCount: _scanResults.where((result) => result.device.name.isEmpty).length,
-                    itemBuilder: (context, index) {
-                      final noNameDevices = _scanResults.where((result) => result.device.name.isEmpty).toList();
-                      final device = noNameDevices[index].device;
-                      return ListTile(
-                        title: const Text("Unnamed Device"),
-                        subtitle: Text(device.id.id),
-                        trailing: ElevatedButton(
-                          child: const Text("Connect"),
-                          onPressed: () => _connectToDevice(device),
-                        ),
+                ? const Center(
+                    child: CircularProgressIndicator(),
+                  )
+                : Builder(
+                    builder: (context) {
+                      final noNameDevices = _scanResults
+                          .where((result) => result.device.name.isEmpty)
+                          .toList();
+
+                      if (noNameDevices.isEmpty) {
+                        return const  Text(
+                            "No unnamed devices found",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          );
+                        
+                      }
+
+                      return ListView.builder(
+                        itemCount: noNameDevices.length,
+                        itemBuilder: (context, index) {
+                          final device = noNameDevices[index].device;
+                          return ListTile(
+                            title: const Text("Unnamed Device"),
+                            subtitle: Text(device.id.id),
+                            trailing: ElevatedButton(
+                              child: const Text("Connect"),
+                              onPressed: () => _connectToDevice(device),
+                            ),
+                          );
+                        },
                       );
                     },
                   ),

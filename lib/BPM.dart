@@ -4,6 +4,13 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'dart:convert';
 
+// Classe pour stocker les données BPM
+class BPMData {
+  final DateTime time;
+  final int bpm;
+
+  BPMData(this.time, this.bpm);
+}
 
 class BPM extends StatefulWidget {
   const BPM({super.key});
@@ -18,6 +25,8 @@ class _BPMState extends State<BPM> {
   BluetoothDevice? _connectedDevice;
   BluetoothCharacteristic? _bpmCharacteristic;
   BluetoothCharacteristic? _commandCharacteristic;
+  List<BPMData> _bpmHistory = [];
+  final int maxDataPoints = 7; // Nombre maximum de points à afficher
 
   // Définition des UUID correspondant à l'Arduino
   final String SERVICE_UUID = "19b10000-e8f2-537e-4f6c-d104768a1214";
@@ -41,6 +50,16 @@ class _BPMState extends State<BPM> {
     }
   }
 
+  void _updateBPMHistory(int bpm) {
+    setState(() {
+      _bpmHistory.add(BPMData(DateTime.now(), bpm));
+      // Garder seulement les derniers points
+      if (_bpmHistory.length > maxDataPoints) {
+        _bpmHistory.removeAt(0);
+      }
+    });
+  }
+
   void _startListeningToBPM() async {
     print('Starting to listen for BPM');
     List<BluetoothService> services = await _connectedDevice!.discoverServices();
@@ -60,11 +79,12 @@ class _BPMState extends State<BPM> {
                 print('Raw value: $rawString');
                 
                 if (rawString.startsWith('b:')) {
-                  // Enlever le préfixe 'b:' et convertir en nombre
                   String bpmValue = rawString.substring(2);
+                  final newBpm = int.tryParse(bpmValue) ?? 0;
                   setState(() {
-                    _bpm = int.tryParse(bpmValue) ?? 0;
+                    _bpm = newBpm;
                   });
+                  _updateBPMHistory(newBpm);
                 }
                 
                 print('Parsed BPM: $_bpm');
@@ -75,7 +95,6 @@ class _BPMState extends State<BPM> {
           
           if (characteristic.uuid.toString() == COMMAND_CHARACTERISTIC_UUID) {
             _commandCharacteristic = characteristic;
-            // Envoyer la commande pour démarrer les mesures BPM
             await _commandCharacteristic!.write(utf8.encode('bpm'));
             print('Sent BPM command');
           }
@@ -133,9 +152,29 @@ class _BPMState extends State<BPM> {
               ),
               Expanded(
                 flex: 6,
-                child: Center(
-                  child: Container(
-                    child: const SfCartesianChart(),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: SfCartesianChart(
+                    primaryXAxis: NumericAxis(
+                      isVisible: false,
+                    ),
+                    primaryYAxis: NumericAxis(
+                      minimum: 0,
+                      maximum: 200,
+                      interval: 20,
+                      title: AxisTitle(text: 'BPM'),
+                    ),
+                    series: <CartesianSeries>[
+                      ColumnSeries<BPMData, int>(
+                        dataSource: _bpmHistory,
+                        xValueMapper: (BPMData data, int index) => index, // Utilisation de l'index comme valeur X
+                        yValueMapper: (BPMData data, _) => data.bpm,
+                        color: Colors.red.shade400,
+                        width: 0.8,
+                        spacing: 0.2,
+                      )
+
+                    ],
                   ),
                 ),
               ),
